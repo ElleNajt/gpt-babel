@@ -1,5 +1,10 @@
 #+title: Readme
 
+* About
+This integrates gptel into org babel, by providing convenience features for fixing errors in org babel cells. For instance, this provides commands to send the cell and the output to gptel, get a correction, and apply that as a patch. It is also possible to send the commands automatically, though currently only for python.
+
+This has been tested with python and bash, though should be anguage agnostic. The automatic response on errors has only been tested with python, and requires some means for detecting an error (see the variable org-babel-error-patterns). PRs are welcome!
+
 * Set up
 
 This requires gptel-default-mode to be set to org-mode to work, since it expects an org block in the response.
@@ -22,4 +27,4 @@ If you set:
 (setq gpt-babel/auto-send-on-traceback t)
 #+end_src
 
-Then blocks will be sent automatically when a traceback is detected in the response. This can rack up a bill with API calls!
+Then blocks will be sent automatically when a traceback is detected in the response. By default this variable is nil -- this can rack up an unnecessary bill with API calls!

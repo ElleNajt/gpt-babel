@@ -232,7 +232,6 @@
 
 (advice-add 'org-babel-insert-result :after #'gpt-babel/test-for-errors)
 
-
 ;;;; Shell
 ;;  Some means to get a recognizable error string in the shell output, for automatic traceback.
 ;; TODO Currently broken
