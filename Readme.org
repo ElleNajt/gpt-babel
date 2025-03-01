@@ -1,0 +1,25 @@
+#+title: Readme
+
+* Set up
+
+This requires gptel-default-mode to be set to org-mode to work, since it expects an org block in the response.
+
+#+begin_src emacs-lisp :tangle yes
+(gptel-default-mode 'org-mode)
+#+end_src
+
+The conversation happens in the *CELL ERRORS* buffer.
+
+| Key         | Command               | Description                             |
+|-------------+-----------------------+-----------------------------------------|
+| ~SPC o c s~ | ~send-block-to-gptel~ | Send block to GPTel, and ask for a fix. |
+| ~SPC o c p~ | ~patch-gptel-blocks~  | Apply the fix                           |
+| ~SPC o c f~ | ~gptel-fix-block~     | Do the two things at once               |
+
+If you set:
+
+#+begin_src emacs-lisp :tangle yes
+(setq gpt-babel/auto-send-on-traceback t)
+#+end_src
+
+Then blocks will be sent automatically when a traceback is detected in the response. This can rack up a bill with API calls!
