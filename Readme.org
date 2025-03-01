@@ -33,10 +33,15 @@ The conversation happens in the *CELL ERRORS* buffer.
 | ~SPC o c p~ | ~patch-gptel-blocks~  | Apply the fix                           |
 | ~SPC o c f~ | ~gptel-fix-block~     | Do the two things at once               |
 
-If you set:
 
-#+begin_src emacs-lisp :tangle yes
-(setq gpt-babel/auto-send-on-traceback t)
+Configure error handling with:
+
+#+begin_src elisp
+(setq gpt-babel/error-action 'send)  ; Options: nil, 'send, or 'fix
 #+end_src
 
-Then blocks will be sent automatically when a traceback is detected in the response. By default this variable is nil -- this can rack up an unnecessary bill with API calls!
+When set to 'send, blocks with errors will be automatically sent to GPT for analysis.
+When set to 'fix, blocks with errors will be sent to GPT, and the patch window will pop up automatically.
+When nil (default), no automatic action is taken on errors.
+
+Note: Automatic handling can increase API usage and costs. Use with caution!

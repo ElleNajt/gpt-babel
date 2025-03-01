@@ -218,19 +218,22 @@
   (let ((has-traceback (gpt-babel/check-babel-result-error )))
     (message (if has-traceback "Traceback detected" "No traceback found"))))
 
-;; Default behavior nil
-(defcustom gpt-babel/auto-send-on-traceback nil
-  "Whether to automatically send code to GPT on traceback."
-  :type 'boolean
+(defcustom gpt-babel/error-action nil
+  "Action to take on code errors: nil (do nothing), 'send, or 'fix."
+  :type '(choice (const :tag "None" nil)
+          (const :tag "Send" send)
+          (const :tag "Fix" fix))
   :group 'gpt-babel)
 
-(defun gpt-babel/test-for-errors (orig-fun params &rest var )
-  (if (and (fboundp 'gpt-babel/send-block-to-gptel) gpt-babel/auto-send-on-traceback)
-      (if (gpt-babel/check-babel-result-error)
-          (gpt-babel/send-block-to-gptel) ())))
+(defun gpt-babel/auto-process-errors (orig-fun params &rest var)
+  (when (and (gpt-babel/check-babel-result-error)
+             gpt-babel/error-action)
+    (if (eq gpt-babel/error-action 'send)
+        (gpt-babel/send-block-to-gptel)
+      (gpt-babel/gptel-fix-block))))
 
 
-(advice-add 'org-babel-insert-result :after #'gpt-babel/test-for-errors)
+(advice-add 'org-babel-insert-result :after #'gpt-babel/auto-process-errors)
 
 ;;;; Shell
 ;;  Some means to get a recognizable error string in the shell output, for automatic traceback.
@@ -245,8 +248,6 @@
     (if (string= (cdr (assq :lang params)) "bash")
         (funcall orig-fun
                  body_with_trap
-                 
-                 
                  params)
       (funcall orig-fun body params))))
 
