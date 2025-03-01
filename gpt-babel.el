@@ -218,7 +218,8 @@
   (let ((has-traceback (gptel-babel/check-babel-result-error )))
     (message (if has-traceback "Traceback detected" "No traceback found"))))
 
-(setq gptel-babel/auto-send-on-traceback t)
+;; Default behavior nil
+(setq gptel-babel/auto-send-on-traceback nil)
 
 (defun gptel-babel/test-for-errors (orig-fun params &rest var )
   (if (and (fboundp 'gptel-babel/send-block-to-gptel) gptel-babel/auto-send-on-traceback)
@@ -248,6 +249,14 @@
       (funcall orig-fun body params))))
 
 ;; (advice-add 'org-babel-execute:shell :around #'gptel-babel/add-error-trap)
+
+;;; Keybindings
+
+(defun gpt-babel-load-keybindings ()
+  "Load alerts integrations for ob-python-extras."
+  (let* ((this-file (locate-library "gpt-babel"))
+         (this-dir (file-name-directory this-file)))
+    (load (expand-file-name "keybindings" this-dir))))
 
 (provide 'gpt-babel)
 ;;; gpt-babel.el ends here
