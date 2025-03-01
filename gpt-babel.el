@@ -21,6 +21,7 @@
 
 
 (require 'general)
+(require 'gptel)
 
 (defun gptel-babel/copy-org-babel-block-and-results ()
   "Copy the current org babel source block and its results."
@@ -230,6 +231,7 @@
 
 ;;;; Shell
 ;;  Some means to get a recognizable error string in the shell output, for automatic traceback.
+;; TODO Currently broken
 
 (defun gptel-babel/add-error-trap (orig-fun body params)
   "Add ERR trap to shell scripts for error reporting."
@@ -245,7 +247,7 @@
                  params)
       (funcall orig-fun body params))))
 
-(advice-add 'org-babel-execute:shell :around #'gptel-babel/add-error-trap)
+;; (advice-add 'org-babel-execute:shell :around #'gptel-babel/add-error-trap)
 
 (provide 'gpt-babel)
 ;;; gpt-babel.el ends here
