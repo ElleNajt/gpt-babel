@@ -4,9 +4,11 @@ This integrates gptel into org babel by providing convenience features for fixin
 
 In particular, this provides commands to send the cell and the output to gptel, get a correction, and apply that as a patch.
 
-It is also possible to send the request for a correction automatically on an error, though currently only for python.
+It is also possible to send the request for a correction automatically on an error, though currently only for python and bash (see below).
 
-This has been tested with python and bash, though should be language agnostic. The automatic response on errors has only been tested with python and bash, and requires some means for detecting an error (see the variable org-babel-error-patterns and set up below). PRs are welcome!
+This has been tested with python and bash, though should be language agnostic.
+
+PRs are welcome!
 
 * Installation:
 
@@ -55,11 +57,4 @@ Note: Automatic handling can increase API usage and costs. Use with caution!
 Needs no additional set up -- gpt calls get triggered when "Traceback (most recent call last)" appears in the output.
 
 ** Bash:
-Requires adding a prologue to source like blocks like so:
-
-#+begin_src emacs-lisp :tangle yes
-#+begin_src bash :prologue "trap 'echo Shell Error' ERR;"
-#+end_src
-#+end_src
-
-This is unsatisfying; ideally there would be some way to detect a nonzero return code in a block that worked across languages.
+Requires adding a prologue to source like blocks like `:prologue "trap 'echo Shell Error' ERR;"`
