@@ -235,24 +235,6 @@
 
 (advice-add 'org-babel-insert-result :after #'gpt-babel/auto-process-errors)
 
-;;;; Shell
-;;  Some means to get a recognizable error string in the shell output, for automatic traceback.
-;; TODO Currently broken
-
-(defun gpt-babel/add-error-trap (orig-fun body params)
-  "Add ERR trap to shell scripts for error reporting."
-  ;;  TODO the problem appears to be that ' is getting converted into ’  
-  (let* ((trap-cmd "trap 'rc=$?; [ $rc -ne 0 ]; then echo \"Shell Error\"; fi' ERR")
-         (body_with_trap  (concat trap-cmd "\n" body))
-         (_ (message (format "%s" body_with_trap))))
-    (if (string= (cdr (assq :lang params)) "bash")
-        (funcall orig-fun
-                 body_with_trap
-                 params)
-      (funcall orig-fun body params))))
-
-;; (advice-add 'org-babel-execute:shell :around #'gpt-babel/add-error-trap)
-
 ;;; Keybindings
 
 (defun gpt-babel-load-keybindings ()

@@ -1,10 +1,12 @@
 #+title: Readme
 
-This integrates gptel into org babel, by providing convenience features for fixing errors in org babel cells. For instance, this provides commands to send the cell and the output to gptel, get a correction, and apply that as a patch.
+This integrates gptel into org babel by providing convenience features for fixing errors in org babel cells.
+
+In particular, this provides commands to send the cell and the output to gptel, get a correction, and apply that as a patch.
 
 It is also possible to send the request for a correction automatically on an error, though currently only for python.
 
-This has been tested with python and bash, though should be language agnostic. The automatic response on errors has only been tested with python, and requires some means for detecting an error (see the variable org-babel-error-patterns). PRs are welcome!
+This has been tested with python and bash, though should be language agnostic. The automatic response on errors has only been tested with python and bash, and requires some means for detecting an error (see the variable org-babel-error-patterns and set up below). PRs are welcome!
 
 * Installation:
 
@@ -45,3 +47,17 @@ When set to 'fix, blocks with errors will be sent to GPT, and the patch window w
 When nil (default), no automatic action is taken on errors.
 
 Note: Automatic handling can increase API usage and costs. Use with caution!
+
+* Setting up automatic error processing:
+** Python:
+Needs no additional set up -- gpt calls get triggered when "Traceback (most recent call last)" appears in the output.
+
+** Bash:
+Requires adding a prologue to source like blocks like so:
+
+#+begin_src emacs-lisp :tangle yes
+#+begin_src bash :prologue "trap 'echo Shell Error' ERR;"
+#+end_src
+#+end_src
+
+This is unsatisfying; ideally there would be some way to detect a nonzero return code in a block that worked across languages.
