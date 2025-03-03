@@ -21,7 +21,7 @@ This has been tested with python and bash, though should be language agnostic. T
 ** TODO Melpa
 * Set up
 
-Use :result output drawer if you want the results of the output to be included in the message to GPT.
+Use :result output if you want the results of the output to be included in the message to GPT.
 
 This requires gptel-default-mode to be set to org-mode to work, since it expects an org block in the response.
 
