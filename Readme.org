@@ -27,7 +27,7 @@ Use :result output if you want the results of the output to be included in the m
 
 This requires gptel-default-mode to be set to org-mode to work, since it expects an org block in the response.
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle yes :results output drawer
 (gptel-default-mode 'org-mode)
 #+end_src
 
@@ -50,11 +50,13 @@ When set to 'send, blocks with errors will be automatically sent to GPT for anal
 When set to 'fix, blocks with errors will be sent to GPT, and the patch window will pop up automatically.
 When nil (default), no automatic action is taken on errors.
 
-Note: Automatic handling can increase API usage and costs. Use with caution!
+Automatic handling can lead to unnecessary GPT API costs -- be careful!
 
 * Setting up automatic error processing:
 ** Python:
 Needs no additional set up -- gpt calls get triggered when "Traceback (most recent call last)" appears in the output.
-
 ** Bash:
 Requires adding a prologue to source like blocks like `:prologue "trap 'echo Shell Error' ERR;"`
+** Adding a language
+PRs are welcome - Just add to the variable `org-babel-error-patterns` , and add instructions on how to get the relevant output string.
+(If someone knows a more general way to detect cell blocks failing, please let me know!)
