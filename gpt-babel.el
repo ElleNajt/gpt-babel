@@ -22,6 +22,117 @@
 (require 'general)
 (require 'gptel)
 
+
+(defun gpt-babel/fix-block-file-above ()
+  (interactive)
+  (gpt-babel/fix-block-with-context 'file-above))
+
+(defun gpt-babel/fix-block-with-help ()
+  (interactive)
+  (gpt-babel/fix-block-with-context 'with-help))
+
+(defun gpt-babel/python-help-clean (symbol process)
+  "Get clean Python help documentation for SYMBOL using PROCESS."
+  (let* ((help-command (format "
+import sys
+from io import StringIO
+import inspect
+
+__help_output = StringIO()
+sys.stdout = __help_output
+try:
+    help('%s')
+    help_text = __help_output.getvalue()
+except:
+    help_text = ''
+sys.stdout = sys.__stdout__
+
+try:
+    if callable(%s) and not inspect.isbuiltin(%s):
+        print('\\nSource code:\\n')
+        source = inspect.getsource(%s).splitlines()[:20]
+        print('\\n'.join(source))
+except:
+    pass
+
+print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20]))
+" symbol symbol symbol symbol)))
+    (with-temp-buffer
+      (insert (python-shell-send-string-no-output help-command process))
+      (goto-char (point-min))
+      (while (re-search-forward "\\(.\\)\b\\1" nil t)
+        (replace-match "\\1"))
+      (buffer-string))))
+
+
+(defun gpt-babel/get-context-with-help (lang block-content src-info)
+  "Get help documentation for each line of BLOCK-CONTENT in LANG using PROCESS."
+  (when (string= lang "python")
+    (let* ((help-text "")
+           (headers (nth 2 src-info))
+           (session (cdr (assoc :session headers)))
+           (session-buffer (get-buffer (format "*%s*" session)))
+           (python-process (when session-buffer
+                             (get-buffer-process session-buffer)))
+           ;; TODO Would be cool to get another GPT process to decide what the important look ups are
+           (python-symbol-regex "\\(?:[a-zA-Z_][a-zA-Z0-9_]*\\(?:\\.[a-zA-Z_][a-zA-Z0-9_]*\\)*\\)"))
+      (dolist (line (split-string block-content "\n"))
+        (save-match-data
+          (let ((pos 0))
+            (while (string-match python-symbol-regex line pos)
+              (let* ((symbol (match-string 0 line))
+                     (_ (message "Found %s" symbol))
+                     (help-result (gpt-babel/python-help-clean symbol python-process))
+                     ;; TODO Truncating to prevent very large contexts
+                     (truncated-help (when help-result
+                                       (substring help-result 0 (min 3000 (length help-result))))))
+                (when (and help-result (not (string-empty-p truncated-help)))
+                  (setq help-text
+                        (concat help-text
+                                (format "\nHelp for %s:\n%s"
+                                        symbol
+                                        help-result))))
+                (setq pos (match-end 0)))))))
+      help-text)))
+
+(defun gpt-babel/get-context (context-type)
+  "Get context based on CONTEXT-TYPE."
+  (when (org-in-src-block-p)
+    (let* ((src-block (org-element-context))
+           (src-info (org-babel-get-src-block-info))
+           (lang (org-element-property :language src-block))
+           (block-begin (org-element-property :begin src-block))
+           (above-content (buffer-substring-no-properties 1 block-begin))
+           (block-content (org-element-property :value src-block))
+           (help-docs (when (eq context-type 'with-help)
+                        (gpt-babel/get-context-with-help lang block-content src-info))))
+      (if (eq context-type 'with-help)
+          (format (alist-get context-type gpt-babel/context-types) 
+                  above-content help-docs lang)
+        (format (alist-get context-type gpt-babel/context-types) 
+                above-content lang)))))
+
+
+
+
+
+(defun gpt-babel/fix-block-with-context (context-type)
+  "Fix block with specified CONTEXT-TYPE."
+  (interactive (list (intern (completing-read 
+                              "Context type: "
+                              '("file-above" "with-help")))))
+  (let ((custom-block-failure-prompt-template 
+         (gpt-babel/get-context context-type)))
+    (gpt-babel/fix-block)))
+
+
+
+(defvar gpt-babel/context-types
+  '((file-above . "Here's the context above this code block:\n%s\nContext ends here.\nPlease fix the code below. Return only the fixed code in a #+begin_src %s block.\n")
+    (with-help . "Here's the context above this code block:\n%s\nContext ends here.\nHere's help documentation for the functions:\nDocumentation ends here.\n%s\nPlease fix the code below. Return only the fixed code in a #+begin_src %s block.\n"))
+  "Templates for different context types.")
+
+
 (defun gpt-babel/fix-with-instructions ()
   "Modify the current block based on comments."
   (interactive)

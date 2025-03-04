@@ -39,15 +39,20 @@ This requires gptel-default-mode to be set to org-mode to work, since it expects
 
 The conversation happens in the *CELL ERRORS* buffer.
 
-| Key         | Command               | Description                                   |
-|-------------+-----------------------+-----------------------------------------------|
-| ~SPC o g s~ | ~gpt-babel/send-block~ | Send block to GPTel, and ask for a fix.       |
-| ~SPC o g p~ | ~gpt-babel/patch-block~ | Apply the fix                                 |
-| ~SPC o g f~ | ~gpt-babel/fix-block~ | Do the two things at once                     |
-| ~SPC o g i~ | ~gpt-babel/fix-with-instructions~ | Modify the block based on comments            |
-| ~SPC o g w~ | ~gpt-babel/wish-complete~ | Turn the todos in the block into working code |
+| Key           | Command                           | Description                                                         |
+|---------------+-----------------------------------+---------------------------------------------------------------------|
+| ~SPC o g s~   | ~gpt-babel/send-block~            | Send block to GPTel, and ask for a fix.                             |
+| ~SPC o g p~   | ~gpt-babel/patch-block~           | Apply the fix                                                       |
+| ~SPC o g f~   | ~gpt-babel/fix-block~             | Do the two things at once                                           |
+| ~SPC o g i~   | ~gpt-babel/fix-with-instructions~ | Modify the block based on comments                                  |
+| ~SPC o g w~   | ~gpt-babel/wish-complete~         | Turn the todos in the block into working code                       |
+| ~SPC o g c a~ | ~gpt-babel/fix-block-file-above~  | Ask gpt to fix , with file up to block as additional context        |
+| ~SPC o g c h~ | ~gpt-babel/fix-block-with-help~   | Same, but also collects help() and source code for called functions |
 
-Configure error handling with:
+
+fix-block-with-help is experimental, and is likely to change in implementation. The vision for that is to collect relevant docstrings and function source code, and include them in the context window.
+
+Configure error handling:
 
 #+begin_src elisp
 (setq gpt-babel/error-action 'send)  ; Options: nil, 'send, or 'fix
@@ -64,7 +69,7 @@ Automatic handling can lead to unnecessary GPT API costs -- be careful!
 Needs no additional set up -- gpt calls get triggered when "Traceback (most recent call last)" appears in the output.
 ** Bash:
 Requires adding a prologue to source like blocks like `:prologue "trap 'echo Shell Error' ERR;"`
-However, this only catches some kinds of errors -- perhaps a bash wizard can intervene.
+However, this only catches some kinds of errors -- perhaps a bash wizard can intervene, or eventually I'll read more of man bash and figure it out...
 ** Adding a language
 PRs are welcome - Just add to the variable `org-babel-error-patterns` , and add instructions on how to get the relevant output string.
 (If someone knows a more general way to detect cell blocks failing, please let me know!)

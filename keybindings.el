@@ -25,13 +25,18 @@
   (defun gpt-babel/map-suggested-keyindings ()
     "Map suggested keybindings"
     (interactive)
-    (evil-define-key* '(normal visual) org-mode-map
-      (kbd "SPC o g f") 'gpt-babel/fix-block
-      (kbd "SPC o g s") 'gpt-babel/send-block
-      (kbd "SPC o g p") 'gpt-babel/patch-block
-      (kbd "SPC o g i") 'gpt-babel/fix-with-instructions
-      (kbd "SPC o g w") 'gpt-babel/wish-complete)))
-
+    (general-define-key
+     :states '(normal visual)
+     :keymaps 'org-mode-map
+     :prefix "SPC o g"
+     "f" 'gpt-babel/fix-block
+     "s" 'gpt-babel/send-block
+     "p" 'gpt-babel/patch-block
+     "i" 'gpt-babel/fix-with-instructions
+     "w" 'gpt-babel/wish-complete
+     "c" '(:ignore t :which-key "context")
+     "c a" 'gpt-babel/fix-block-file-above
+     "c h" 'gpt-babel/fix-block-with-help)))
 
 
 (provide 'keybindings)
