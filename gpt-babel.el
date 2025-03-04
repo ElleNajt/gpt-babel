@@ -22,14 +22,14 @@
 (require 'general)
 (require 'gptel)
 
-(defun gpt-babel/fix-with-instruction ()
+(defun gpt-babel/fix-with-instructions ()
   "Modify the current block based on comments."
   (interactive)
   (when (org-in-src-block-p)
     (let* ((comment (read-string "Enter your modification request: "))
            (custom-block-failure-prompt-template
             (format "Please modify the code according to this request: %s\nReturn only the modified code in a #+begin_src %%s block.\n" comment)))
-      (gpt-babel/gptel-fix-block))))
+      (gpt-babel/fix-block))))
 
 (defun gpt-babel/wish-complete ()
   "Turn the todos in the block into working code."
@@ -37,7 +37,7 @@
   (when (org-in-src-block-p)
     (let ((custom-block-failure-prompt-template
            "Please implement the TODOs in this code. Return only the completed code in a #+begin_src %s block.\n"))
-      (gpt-babel/gptel-fix-block))))
+      (gpt-babel/fix-block))))
 
 (defun gpt-babel/copy-org-babel-block-and-results ()
   "Copy the current org babel source block and its results."
@@ -90,7 +90,7 @@
     (re-search-forward "#\\+end_src" nil t)
     (line-beginning-position)))
 
-(defun gpt-babel/send-block-to-gptel ()
+(defun gpt-babel/send-block ()
   "Send org babel block with results to new gptel buffer without affecting current buffer."
   (interactive)
   (when (org-in-src-block-p)
@@ -131,7 +131,7 @@
       (delete-file file2)
       (buffer-string))))
 
-(defun gpt-babel/patch-gptel-blocks ()
+(defun gpt-babel/patch-block ()
   "Send block to gptel and show diff with accept option."
   (interactive)
   (let* ((original-buffer (current-buffer))
@@ -176,24 +176,24 @@
       (display-buffer diff-buffer)
       (pop-to-buffer diff-buffer))))
 
-(defvar gpt-babel/gptel-fix-block-buffer nil
+(defvar gpt-babel/fix-block-buffer nil
   "Buffer to patch after GPT response.")
 
-(defun gpt-babel/gptel-fix-block-response (beg end)
+(defun gpt-babel/fix-block-response (beg end)
   "Handle GPT response for block fixing."
-  (when gpt-babel/gptel-fix-block-buffer
-    (with-current-buffer gpt-babel/gptel-fix-block-buffer
-      (gpt-babel/patch-gptel-blocks))
+  (when gpt-babel/fix-block-buffer
+    (with-current-buffer gpt-babel/fix-block-buffer
+      (gpt-babel/patch-block))
     (pop-to-buffer "*GPT Block Diff*")
-    (setq gpt-babel/gptel-fix-block-buffer nil)))
+    (setq gpt-babel/fix-block-buffer nil)))
 
-(add-hook 'gptel-post-response-functions #'gpt-babel/gptel-fix-block-response)
+(add-hook 'gptel-post-response-functions #'gpt-babel/fix-block-response)
 
-(defun gpt-babel/gptel-fix-block ()
+(defun gpt-babel/fix-block ()
   "Send block to GPT and patch when response is received."
   (interactive)
-  (setq gpt-babel/gptel-fix-block-buffer (current-buffer))
-  (gpt-babel/send-block-to-gptel))
+  (setq gpt-babel/fix-block-buffer (current-buffer))
+  (gpt-babel/send-block))
 
 
 ;;; Automation:
@@ -244,8 +244,8 @@
   (when (and (gpt-babel/check-babel-result-error)
              gpt-babel/error-action)
     (if (eq gpt-babel/error-action 'send)
-        (gpt-babel/send-block-to-gptel)
-      (gpt-babel/gptel-fix-block))))
+        (gpt-babel/send-block)
+      (gpt-babel/fix-block))))
 
 
 (advice-add 'org-babel-insert-result :after #'gpt-babel/auto-process-errors)

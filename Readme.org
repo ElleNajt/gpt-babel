@@ -33,11 +33,11 @@ The conversation happens in the *CELL ERRORS* buffer.
 
 | Key         | Command               | Description                                   |
 |-------------+-----------------------+-----------------------------------------------|
-| ~SPC o g s~ | ~send-block-to-gptel~ | Send block to GPTel, and ask for a fix.       |
-| ~SPC o g p~ | ~patch-gptel-blocks~  | Apply the fix                                 |
-| ~SPC o g f~ | ~gptel-fix-block~     | Do the two things at once                     |
-| ~SPC o g c~ | ~gptel-with-comments~ | Modify the block based on comments            |
-| ~SPC o g w~ | ~gptel-wish-complete~ | Turn the todos in the block into working code |
+| ~SPC o g s~ | ~gpt-babel/send-block~ | Send block to GPTel, and ask for a fix.       |
+| ~SPC o g p~ | ~gpt-babel/patch-block~ | Apply the fix                                 |
+| ~SPC o g f~ | ~gpt-babel/fix-block~ | Do the two things at once                     |
+| ~SPC o g i~ | ~gpt-babel/fix-with-instructions~ | Modify the block based on comments            |
+| ~SPC o g w~ | ~gpt-babel/wish-complete~ | Turn the todos in the block into working code |
 
 Configure error handling with:
 
