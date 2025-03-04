@@ -28,7 +28,9 @@
     (evil-define-key* '(normal visual) org-mode-map
       (kbd "SPC o g f") 'gpt-babel/gptel-fix-block
       (kbd "SPC o g s") 'gpt-babel/send-block-to-gptel
-      (kbd "SPC o g p") 'gpt-babel/patch-gptel-blocks)))
+      (kbd "SPC o g p") 'gpt-babel/patch-gptel-blocks
+      (kbd "SPC o g i") 'gpt-babel/fix-with-instruction
+      (kbd "SPC o g w") 'gpt-babel/wish-complete)))
 
 
 

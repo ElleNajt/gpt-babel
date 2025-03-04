@@ -19,9 +19,25 @@
 ;;
 ;;; Code:
 
-
 (require 'general)
 (require 'gptel)
+
+(defun gpt-babel/fix-with-instruction ()
+  "Modify the current block based on comments."
+  (interactive)
+  (when (org-in-src-block-p)
+    (let* ((comment (read-string "Enter your modification request: "))
+           (custom-block-failure-prompt-template
+            (format "Please modify the code according to this request: %s\nReturn only the modified code in a #+begin_src %%s block.\n" comment)))
+      (gpt-babel/gptel-fix-block))))
+
+(defun gpt-babel/wish-complete ()
+  "Turn the todos in the block into working code."
+  (interactive)
+  (when (org-in-src-block-p)
+    (let ((custom-block-failure-prompt-template
+           "Please implement the TODOs in this code. Return only the completed code in a #+begin_src %s block.\n"))
+      (gpt-babel/gptel-fix-block))))
 
 (defun gpt-babel/copy-org-babel-block-and-results ()
   "Copy the current org babel source block and its results."
@@ -210,7 +226,6 @@
       (when (and results-start error-pattern)
         (goto-char results-start)
         (re-search-forward error-pattern results-end t)))))
-
 
 (defun gpt-babel/test-check-traceback ()
   "Test the traceback detection function."
