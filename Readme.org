@@ -6,6 +6,12 @@ In particular, this provides commands to send the cell and the output to gptel, 
 
 It is also possible to send the request for a correction automatically on an error, though currently only for python (see below).
 
+This gif demonstrates:
+1. Asking gpt to "fulfill wishes" (SPC o g w) by replacing the TODO with code
+2. Running the block, and sending it to gpt automatically on error (see configuring gpt-babel/error-action below).
+3. Applying the patch provided by gpt (SPC o g p)
+4. Fixing the block with instructions (SPC o g i), in this case for some silly comments.
+
 [[recording.gif]]
 
 * Installation:
