@@ -233,16 +233,38 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
                      (org-element-property :begin src-block)
                      end))
            (prompt (format custom-block-failure-prompt-template lang))
+           (home-dir (file-name-directory buffer-file-name))
+
+           (home-file (file-name-sans-extension 
+                       (file-name-nondirectory buffer-file-name)))
+           (_ (message "home file %s" (file-name-directory buffer-file-name)))
            (buf (or (get-buffer "*CELL ERRORS*")
                     (progn (gpt-babel/init-cell-errors-gptel)
                            (get-buffer "*CELL ERRORS*")))))
       (with-current-buffer buf
         (setq-local org-babel-default-header-args header-args)
+        (setq-local gpt-babel-home-dir home-dir)
+        (setq-local gpt-babel-home-file home-file)
         (erase-buffer)
         (insert prompt content)
         (gptel-send)
         (pop-to-buffer buf)))))
 
+(defun gpt-babel/adjust-plot-paths (orig-fun params &rest args)
+  (interactive)
+  "Adjust file paths in babel results to use gpt-babel-home-file."
+  (let* ((options (nth 2 (car args)))
+         (auto-align (if (string= "no" (cdr (assq :tables-auto-align options))) nil t))
+         (result (apply orig-fun params args)))
+    (if (stringp result)
+        (replace-regexp-in-string
+         "\\[\\[file:plots/\\([^]]+\\)\\]\\]"
+         (lambda (match)
+           (format "[[file:%s/plots/%s]]"
+                   gpt-babel-home-file
+                   (match-string 1 match)))
+         result)
+      result)))
 
 (defun gpt-babel/diff-strings (str1 str2)
   "Return a diff between STR1 and STR2 as a string."
