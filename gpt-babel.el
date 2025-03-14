@@ -250,22 +250,6 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
         (gptel-send)
         (pop-to-buffer buf)))))
 
-(defun gpt-babel/adjust-plot-paths (orig-fun params &rest args)
-  (interactive)
-  "Adjust file paths in babel results to use gpt-babel-home-file."
-  (let* ((options (nth 2 (car args)))
-         (auto-align (if (string= "no" (cdr (assq :tables-auto-align options))) nil t))
-         (result (apply orig-fun params args)))
-    (if (stringp result)
-        (replace-regexp-in-string
-         "\\[\\[file:plots/\\([^]]+\\)\\]\\]"
-         (lambda (match)
-           (format "[[file:%s/plots/%s]]"
-                   gpt-babel-home-file
-                   (match-string 1 match)))
-         result)
-      result)))
-
 (defun gpt-babel/diff-strings (str1 str2)
   "Return a diff between STR1 and STR2 as a string."
   (with-temp-buffer
