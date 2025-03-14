@@ -39,10 +39,13 @@ This requires gptel-default-mode to be set to org-mode to work, since it expects
 
 The conversation happens in the *CELL ERRORS* buffer.
 
+The header args from the org babel block are carried to the conversation window, meaning that you can run cells that gptel suggests in the chat, and have them be in the same session.
+
+
 | Key           | Command                           | Description                                                         |
 |---------------+-----------------------------------+---------------------------------------------------------------------|
 | ~SPC o g s~   | ~gpt-babel/send-block~            | Send block to GPTel, and ask for a fix.                             |
-| ~SPC o g p~   | ~gpt-babel/patch-block~           | Apply the fix                                                       |
+| ~SPC o g p~   | ~gpt-babel/patch-block~           | Apply the fix -- this takes the last block in *CELL ERRORS*         |
 | ~SPC o g f~   | ~gpt-babel/fix-block~             | Do the two things at once                                           |
 | ~SPC o g i~   | ~gpt-babel/fix-with-instructions~ | Modify the block based on comments                                  |
 | ~SPC o g w~   | ~gpt-babel/wish-complete~         | Turn the todos in the block into working code                       |
@@ -55,6 +58,7 @@ fix-block-with-help is experimental, and is likely to change in implementation. 
 Configure error handling:
 
 #+begin_src elisp
+
 (setq gpt-babel/error-action 'send)  ; Options: nil, 'send, or 'fix
 #+end_src
 

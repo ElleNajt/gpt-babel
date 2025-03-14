@@ -176,6 +176,17 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
   "Please explain the issue, and please provide a corrected version of this, in a #+begin_src %s block.\n"
   "Template for the failure prompt, where %s is replaced with the language.")
 
+(defun gpt-babel/get-last-src-block (lang)
+  "Get content of last source block of type LANG."
+  (save-excursion
+    (goto-char (point-min))
+    (let (last-block)
+      (while (re-search-forward (format "^[ \t]*#\\+begin_src %s" lang) nil t)
+        (let ((start (point)))
+          (re-search-forward "^[ \t]*#\\+end_src" nil t)
+          (setq last-block (buffer-substring-no-properties start (match-beginning 0)))))
+      last-block)))
+
 (defun gpt-babel/get-second-src-block (lang)
   "Get content of second source block of type LANG."
   (save-excursion
@@ -201,12 +212,16 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
     (re-search-forward "#\\+end_src" nil t)
     (line-beginning-position)))
 
+
 (defun gpt-babel/send-block ()
   "Send org babel block with results to new gptel buffer without affecting current buffer."
   (interactive)
   (when (org-in-src-block-p)
     (let* ((src-block (org-element-context))
            (lang (org-element-property :language src-block))
+           (params (org-element-property :parameters src-block))
+           (info (org-babel-get-src-block-info t))
+           (header-args (nth 2 info))  ; Extract header args from info
            (results (org-babel-where-is-src-block-result))
            (end (if results
                     (save-excursion
@@ -217,18 +232,17 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
            (content (buffer-substring-no-properties
                      (org-element-property :begin src-block)
                      end))
-
            (prompt (format custom-block-failure-prompt-template lang))
-
            (buf (or (get-buffer "*CELL ERRORS*")
                     (progn (gpt-babel/init-cell-errors-gptel)
                            (get-buffer "*CELL ERRORS*")))))
-
       (with-current-buffer buf
+        (setq-local org-babel-default-header-args header-args)
         (erase-buffer)
         (insert prompt content)
         (gptel-send)
         (pop-to-buffer buf)))))
+
 
 (defun gpt-babel/diff-strings (str1 str2)
   "Return a diff between STR1 and STR2 as a string."
@@ -257,7 +271,7 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
                                    (end (gpt-babel/org-babel-get-src-block-end)))
                                (buffer-substring-no-properties start end))))
          (gpt-block (with-current-buffer "*CELL ERRORS*"
-                      (gpt-babel/get-second-src-block lang)))
+                      (gpt-babel/get-last-src-block lang)))
          (diff-buffer (get-buffer-create "*GPT Block Diff*"))
          (map (make-sparse-keymap)))
     (with-current-buffer diff-buffer
