@@ -30,6 +30,7 @@
      :keymaps 'org-mode-map
      :prefix "SPC o g"
      "f" 'gpt-babel/fix-block
+     "t" 'gpt-babel/talk
      "s" 'gpt-babel/send-block
      "p" 'gpt-babel/patch-block
      "i" 'gpt-babel/fix-with-instructions

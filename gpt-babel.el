@@ -132,6 +132,14 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
     (with-help . "Here's the context above this code block:\n%s\nContext ends here.\nHere's help documentation for the functions:\nDocumentation ends here.\n%s\nPlease fix the code below. Return only the fixed code in a #+begin_src %s block.\n"))
   "Templates for different context types.")
 
+(defun gpt-babel/talk ()
+  "Chat about the cell."
+  (interactive)
+  (when (org-in-src-block-p)
+    (let* ((comment (read-string "Prompt:"))
+           (custom-block-failure-prompt-template
+            (format "%s \n" comment)))
+      (gpt-babel/send-block))))
 
 (defun gpt-babel/fix-with-instructions ()
   "Modify the current block based on comments."
