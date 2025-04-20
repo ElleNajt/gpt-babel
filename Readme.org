@@ -1,10 +1,12 @@
 #+title: Readme
 
-This integrates [[https://github.com/karthink/gptel][gptel]] into org babel by providing convenience features for fixing errors in org babel cells. This has been tested with python and bash, though should be language agnostic.
+This integrates [[https://github.com/karthink/gptel][gptel]] into org babel by providing convenience features for fixing errors in org babel cells, and for turning gptel session into interactive org babel sessions. This has been tested with python and bash, though should be language agnostic.
 
 In particular, this provides commands to send the cell and the output to gptel, get a correction, and apply that as a patch.
 
 It is also possible to send the request for a correction automatically on an error, though currently only for python (see below).
+
+This also sets customizable org babel headers in gptel sessions, so that they can immediately have your preferred preferences.
 
 This gif demonstrates:
 1. Asking gpt to "fulfill wishes" (SPC o g w) by replacing the TODO with code
@@ -67,6 +69,14 @@ When set to 'fix, blocks with errors will be sent to GPT, and the patch window w
 When nil (default), no automatic action is taken on errors.
 
 Automatic handling can lead to unnecessary GPT API costs -- be careful!
+
+* Setting up defaults headers
+
+This configures uses a customizable alist, gpt-babel-header-args-alist , to set the default org-babel header args in a gptel session.
+
+For instance, you can configure the default python interpreter.
+
+The only option that is not customizable is the session, which is always set to the name of the gptel buffer.
 
 * Setting up automatic error processing:
 ** Python:

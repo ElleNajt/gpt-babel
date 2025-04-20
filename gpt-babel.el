@@ -113,9 +113,6 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
                 above-content lang)))))
 
 
-
-
-
 (defun gpt-babel/fix-block-with-context (context-type)
   "Fix block with specified CONTEXT-TYPE."
   (interactive (list (intern (completing-read 
@@ -126,14 +123,13 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
     (gpt-babel/fix-block)))
 
 
-
 (defvar gpt-babel/context-types
   '((file-above . "Here's the context above this code block:\n%s\nContext ends here.\nPlease fix the code below. Return only the fixed code in a #+begin_src %s block.\n")
     (with-help . "Here's the context above this code block:\n%s\nContext ends here.\nHere's help documentation for the functions:\nDocumentation ends here.\n%s\nPlease fix the code below. Return only the fixed code in a #+begin_src %s block.\n"))
   "Templates for different context types.")
 
 (defun gpt-babel/talk ()
-  "Chat about the cell."
+  "Chat based on the input prompt."
   (interactive)
   (when (org-in-src-block-p)
     (let* ((comment (read-string "Prompt:"))
@@ -398,4 +394,36 @@ print('\\n'.join((help_text + '\\n' + __help_output.getvalue()).splitlines()[:20
     (load (expand-file-name "keybindings" this-dir))))
 
 (provide 'gpt-babel)
+
+
+;;; Default environment
+
+(defcustom gpt-babel-header-args-alist
+  '((python . ((:results . "output drawer")
+               (:async . "t")
+               (:tangle . "yes")
+               (:python . "python")))
+    (bash . ((:results . "output")
+             (:async . "t")
+             (:tangle . "yes")
+             (:prologue . "")
+             (:noweb . "yes"))))
+  "Alist of default header arguments for different babel languages."
+  :type '(alist :key-type symbol :value-type alist)
+  :group 'gptel-babel)
+
+(defun gpt-babel-set-header-args ()
+  "Set local header arguments for babel blocks in GPTL buffers."
+  (unless (string= (buffer-name) "*CELL ERRORS*")
+    (let ((session-name (buffer-name)))
+      (dolist (lang-config gpt-babel-header-args-alist)
+        (let* ((lang (car lang-config))
+               (args (append 
+                      (cdr lang-config)
+                      `((:session . ,(format "%s_%s" lang session-name))))))
+          (set (intern (format "org-babel-default-header-args:%s" lang))
+               args))))))
+
+(add-hook 'gptel-mode-hook #'gpt-babel-set-header-args)
+
 ;;; gpt-babel.el ends here
